@@ -1,0 +1,19 @@
+{
+  "application": "ee382bbb-006f-3ea7-745f-b6ed2abf1cbf",
+  "boundedContext": "832197f4-6369-55bb-d5b9-4cccdddf8d2e",
+  "boundedContextName": "GetStuffDone",
+  "resources": {
+    "readModels": {
+      "production": "MongoDB",
+      "development": "MongoDB"
+    },
+    "eventStore": {
+      "production": "MongoDB",
+      "development": "MongoDB"
+    }
+  },
+  "core": {
+    "language": "csharp"
+  },
+  "interaction": []
+}
