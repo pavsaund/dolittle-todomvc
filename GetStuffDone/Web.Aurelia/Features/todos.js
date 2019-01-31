@@ -1,4 +1,4 @@
-import {ObserverLocator, observable} from 'aurelia-binding';
+import {ObserverLocator, observable, computedFrom} from 'aurelia-binding';
 import {TodoItem} from './todo-item';
 import _ from 'underscore';
 import { inject } from 'aurelia-framework';
@@ -9,10 +9,24 @@ const ENTER_KEY = 13;
 @inject(ObserverLocator)
 export class todos {
 	@observable items = [];
-	@observable filteredItems = [];
 	@observable filter = '';
 	@observable newTodoTitle = null;
 	@observable areAllChecked = false;
+
+	@computedFrom('items', 'filter')
+	get filteredItems() {
+		const filter = this.filter || '!';
+
+		switch (filter) {
+			case 'active':
+				return _(this.items).filter(i => !i.isCompleted);
+			case 'completed':
+				return _(this.items).filter(i => i.isCompleted);
+			default:
+				return this.items;
+		}
+	}
+
 	
 	constructor(observerLocator, storage = null) {	
 		this.observerLocator = observerLocator;
@@ -20,7 +34,7 @@ export class todos {
 	}
 	
 	activate(params) {
-		this.updateFilteredItems(params.filter);
+		this.filter = params.filter;
 	}
 	
 	bind(bindingContext,overrideContext) {
@@ -44,7 +58,6 @@ export class todos {
 		this.items.push(newTodoItem);
 		this.newTodoTitle = null;
 		this.updateAreAllCheckedState();
-		this.updateFilteredItems(this.filter);
 		this.save();
 	}
 
@@ -69,7 +82,6 @@ export class todos {
 
 	onIsCompletedChanged() {
 		this.updateAreAllCheckedState();
-		this.updateFilteredItems(this.filter);
 
 		this.save();
 	}
@@ -77,7 +89,6 @@ export class todos {
 	deleteTodo(todoItem) {
 		this.items = _(this.items).without(todoItem);
 		this.updateAreAllCheckedState();
-		this.updateFilteredItems(this.filter);
 		this.save();
 	}
 
@@ -87,13 +98,11 @@ export class todos {
 			return item;
 		});
 
-		this.updateFilteredItems(this.filter);
 	}
 
 	clearCompletedTodos() {
 		this.items = _(this.items).filter(i => !i.isCompleted);
 		this.areAllChecked = false;
-		this.updateFilteredItems(this.filter);
 		this.save();
 	}
 
@@ -103,22 +112,6 @@ export class todos {
 
 	updateAreAllCheckedState() {
 		this.areAllChecked = _(this.items).all(i => i.isCompleted);
-	}
-
-	updateFilteredItems(filter) {
-		this.filter = filter || '!';
-
-		switch (filter) {
-			case 'active':
-				this.filteredItems = _(this.items).filter(i => !i.isCompleted);
-				break;
-			case 'completed':
-				this.filteredItems = _(this.items).filter(i =>	i.isCompleted);
-				break;
-			default:
-				this.filteredItems = this.items;
-				break;
-		}
 	}
 
 	load() {
