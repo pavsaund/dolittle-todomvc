@@ -5,9 +5,10 @@ export class app {
     }
 
     configureRouter(config, router) {
-        config.options.pushState = true;
+        // config.options.pushState = true;
+        config.title = 'TodoMVC'
         config.map([
-            { route: '', name: 'Home', moduleId: PLATFORM.moduleName('home') }
+            { route: ['', ':filter'], moduleId: PLATFORM.moduleName('todos') }
         ]);
 
         this.router = router;
